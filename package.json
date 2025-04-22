@@ -12,10 +12,28 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "MD Babel",
+      "properties": {
+        "mdBabel.executablePath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the md-babel executable"
+        }
+      }
+    },
     "commands": [
       {
-        "command": "vscode-md-babel.helloWorld",
-        "title": "Hello World"
+        "command": "vscode-md-babel.executeBlockAtPoint",
+        "title": "Execute Markdown Block at Point"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "vscode-md-babel.executeBlockAtPoint",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "editorTextFocus && editorLangId == markdown"
       }
     ]
   },
