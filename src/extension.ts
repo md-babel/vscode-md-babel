@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { execSync } from 'child_process';
 
-/// 1-based line and column indices (conforming to cmark).
+/** 1-based line and column indices (conforming to cmark). */
 interface SourceLocation {
   line: number;
   column: number;
@@ -53,12 +53,30 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(disposable);
 }
 
-/// Convert position to 1-based line and column.
-function getSourceLocation(position: vscode.Position): SourceLocation {
+/** Convert position to 1-based line and column.*/
+export function getSourceLocation(position: vscode.Position): SourceLocation {
   return {
     line: position.line + 1,
     column: position.character + 1
   };
+}
+
+/** Convert 1-based line and column location to VSCode Position .*/
+export function getPosition(sourceLocation: SourceLocation): vscode.Position {
+  return new vscode.Position(
+    sourceLocation.line - 1,
+    sourceLocation.column - 1
+  );
+}
+
+/** Convert 1-based line and column source location range to VSCode Range.*/
+export function getRange(range: SourceRange): vscode.Range {
+  return new vscode.Range(getPosition(range.from), getPosition(range.to));
+}
+
+/** Convert 1-based line and column source location range to VSCode Selection.*/
+export function getSelection(range: SourceRange): vscode.Selection {
+  return new vscode.Selection(getPosition(range.from), getPosition(range.to));
 }
 
 function executeMdBabel(mdBabelPath: string, location: SourceLocation, documentText: string): Promise<MdBabelResponse> {
@@ -80,30 +98,13 @@ function executeMdBabel(mdBabelPath: string, location: SourceLocation, documentT
 
 async function applyResponse(editor: vscode.TextEditor, response: MdBabelResponse): Promise<void> {
   // 1) Apply replacementString at replacementRange in the editor.
-  const replaceFrom = new vscode.Position(
-    response.replacementRange.from.line - 1,
-    response.replacementRange.from.column - 1
-  );
-  const replaceTo = new vscode.Position(
-    response.replacementRange.to.line - 1,
-    response.replacementRange.to.column - 1
-  );
-  const replacementRange = new vscode.Range(replaceFrom, replaceTo);
-
+  const replacementRange = getRange(response.replacementRange);
   await editor.edit(editBuilder => {
     editBuilder.replace(replacementRange, response.replacementString);
   });
 
   // 2) Set selection to the range indicated in the response (should be the original location).
-  const selectFrom = new vscode.Position(
-    response.range.from.line - 1,
-    response.range.from.column - 1
-  );
-  const selectTo = new vscode.Position(
-    response.range.to.line - 1,
-    response.range.to.column - 1
-  );
-  editor.selection = new vscode.Selection(selectFrom, selectTo);
+  editor.selection = getSelection(response.range);
 }
 
 export function deactivate() {}
