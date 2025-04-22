@@ -1,26 +1,109 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { execSync } from 'child_process';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "vscode-md-babel" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('vscode-md-babel.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from vscode-md-babel!');
-	});
-
-	context.subscriptions.push(disposable);
+/// 1-based line and column indices (conforming to cmark).
+interface SourceLocation {
+  line: number;
+  column: number;
 }
 
-// This method is called when your extension is deactivated
+interface SourceRange {
+  from: SourceLocation;
+  to: SourceLocation;
+}
+
+interface MdBabelResponse {
+  replacementRange: SourceRange;
+  replacementString: string;
+  range: SourceRange;
+}
+
+export function activate(context: vscode.ExtensionContext) {
+  let disposable = vscode.commands.registerCommand('vscode-md-babel.executeBlockAtPoint', async () => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage('No active editor!');
+      return;
+    }
+
+    if (editor.document.languageId !== 'markdown') {
+      vscode.window.showErrorMessage('Not a Markdown file!');
+      return;
+    }
+
+    const config = vscode.workspace.getConfiguration('mdBabel');
+    const mdBabelPath = config.get<string>('executablePath');
+
+    if (!mdBabelPath) {
+      vscode.window.showErrorMessage('md-babel executable path not set. Please configure mdBabel.executablePath');
+      return;
+    }
+
+    try {
+      const position = editor.selection.active;
+      const location = getSourceLocation(position);
+      const response = await executeMdBabel(mdBabelPath, location, editor.document.getText());
+
+      await applyResponse(editor, response);
+    } catch (error) {
+      vscode.window.showErrorMessage(`Error executing md-babel: ${error}`);
+    }
+  });
+
+  context.subscriptions.push(disposable);
+}
+
+/// Convert position to 1-based line and column.
+function getSourceLocation(position: vscode.Position): SourceLocation {
+  return {
+    line: position.line + 1,
+    column: position.character + 1
+  };
+}
+
+function executeMdBabel(mdBabelPath: string, location: SourceLocation, documentText: string): Promise<MdBabelResponse> {
+  return new Promise((resolve, reject) => {
+    try {
+      const command = `${mdBabelPath} exec --line ${location.line} --column ${location.column}`;
+      const output = execSync(command, {
+        input: documentText,
+        encoding: 'utf-8'
+      });
+
+      const response = JSON.parse(output) as MdBabelResponse;
+      resolve(response);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+async function applyResponse(editor: vscode.TextEditor, response: MdBabelResponse): Promise<void> {
+  // 1) Apply replacementString at replacementRange in the editor.
+  const replaceFrom = new vscode.Position(
+    response.replacementRange.from.line - 1,
+    response.replacementRange.from.column - 1
+  );
+  const replaceTo = new vscode.Position(
+    response.replacementRange.to.line - 1,
+    response.replacementRange.to.column - 1
+  );
+  const replacementRange = new vscode.Range(replaceFrom, replaceTo);
+
+  await editor.edit(editBuilder => {
+    editBuilder.replace(replacementRange, response.replacementString);
+  });
+
+  // 2) Set selection to the range indicated in the response (should be the original location).
+  const selectFrom = new vscode.Position(
+    response.range.from.line - 1,
+    response.range.from.column - 1
+  );
+  const selectTo = new vscode.Position(
+    response.range.to.line - 1,
+    response.range.to.column - 1
+  );
+  editor.selection = new vscode.Selection(selectFrom, selectTo);
+}
+
 export function deactivate() {}
