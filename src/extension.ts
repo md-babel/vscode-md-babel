@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { execSync } from 'child_process';
+import * as path from 'path';
+import { execFileSync } from 'child_process';
 
 /** 1-based line and column indices (conforming to cmark). */
 interface SourceLocation {
@@ -42,7 +43,22 @@ export function activate(context: vscode.ExtensionContext) {
     try {
       const position = editor.selection.active;
       const location = getSourceLocation(position);
-      const response = await executeCodeBlock(mdBabelPath, location, editor.document.getText());
+
+      let workingDir: string;
+      if (editor.document.uri.scheme === 'file') {
+        const fileDir = path.dirname(editor.document.uri.fsPath);
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+        workingDir = workspaceFolder ? workspaceFolder.uri.fsPath : fileDir;
+      } else {
+        workingDir = process.cwd();
+      }
+
+      const response = await executeCodeBlock(
+        mdBabelPath,
+        workingDir,
+        location,
+        editor.document.getText()
+      );
 
       await applyResponse(editor, response);
     } catch (error) {
@@ -81,17 +97,23 @@ export function getSelection(range: SourceRange): vscode.Selection {
 
 function executeCodeBlock(
   mdBabelPath: string,
+  workingDir: string,
   location: SourceLocation,
   documentText: string
 ): Promise<MdBabelResponse> {
   return new Promise((resolve, reject) => {
     try {
-      const command = `${mdBabelPath} exec --line ${location.line} --column ${location.column}`;
-      const output = execSync(command, {
+      const output = execFileSync(mdBabelPath, [
+        'exec',
+        '--dir', workingDir,
+        '--line', `${location.line}`,
+        '--column', `${location.column}`,
+      ],
+      {
         input: documentText,
-        encoding: 'utf-8'
+        encoding: 'utf-8',
+        cwd: workingDir
       });
-
       const response = JSON.parse(output) as MdBabelResponse;
       resolve(response);
     } catch (error) {
@@ -100,7 +122,10 @@ function executeCodeBlock(
   });
 }
 
-async function applyResponse(editor: vscode.TextEditor, response: MdBabelResponse): Promise<void> {
+async function applyResponse(
+  editor: vscode.TextEditor,
+  response: MdBabelResponse
+): Promise<void> {
   // 1) Apply replacementString at replacementRange in the editor.
   const replacementRange = getRange(response.replacementRange);
   await editor.edit(editBuilder => {
