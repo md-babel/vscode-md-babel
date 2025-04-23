@@ -42,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
     try {
       const position = editor.selection.active;
       const location = getSourceLocation(position);
-      const response = await executeMdBabel(mdBabelPath, location, editor.document.getText());
+      const response = await executeCodeBlock(mdBabelPath, location, editor.document.getText());
 
       await applyResponse(editor, response);
     } catch (error) {
@@ -79,7 +79,11 @@ export function getSelection(range: SourceRange): vscode.Selection {
   return new vscode.Selection(getPosition(range.from), getPosition(range.to));
 }
 
-function executeMdBabel(mdBabelPath: string, location: SourceLocation, documentText: string): Promise<MdBabelResponse> {
+function executeCodeBlock(
+  mdBabelPath: string,
+  location: SourceLocation,
+  documentText: string
+): Promise<MdBabelResponse> {
   return new Promise((resolve, reject) => {
     try {
       const command = `${mdBabelPath} exec --line ${location.line} --column ${location.column}`;
