@@ -45,17 +45,22 @@ export function activate(context: vscode.ExtensionContext) {
       const location = getSourceLocation(position);
 
       let workingDir: string;
+      let filename: string | undefined;
       if (editor.document.uri.scheme === 'file') {
-        const fileDir = path.dirname(editor.document.uri.fsPath);
+        const fsPath = editor.document.uri.fsPath;
+        const fileDir = path.dirname(fsPath);
         const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
         workingDir = workspaceFolder ? workspaceFolder.uri.fsPath : fileDir;
+        filename = path.basename(fsPath, path.extname(fsPath));
       } else {
         workingDir = process.cwd();
+        filename = undefined;
       }
 
       const response = await executeCodeBlock(
         mdBabelPath,
         workingDir,
+        filename,
         location,
         editor.document.getText()
       );
@@ -98,17 +103,24 @@ export function getSelection(range: SourceRange): vscode.Selection {
 function executeCodeBlock(
   mdBabelPath: string,
   workingDir: string,
+  filename: string | undefined,
   location: SourceLocation,
   documentText: string
 ): Promise<MdBabelResponse> {
   return new Promise((resolve, reject) => {
     try {
-      const output = execFileSync(mdBabelPath, [
+      let args = [
         'exec',
         '--dir', workingDir,
         '--line', `${location.line}`,
         '--column', `${location.column}`,
-      ],
+      ];
+
+      if (filename !== undefined) {
+        args.push('--filename', filename);
+      }
+
+      const output = execFileSync(mdBabelPath, args,
       {
         input: documentText,
         encoding: 'utf-8',
