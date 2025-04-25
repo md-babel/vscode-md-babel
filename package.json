@@ -3,7 +3,7 @@
   "publisher": "md-babel",
   "displayName": "Markdown Babel",
   "description": "Execute code blocks in Markdown files using md-babel",
-  "version": "0.0.1",
+  "version": "0.2.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/md-babel/vscode-md-babel"
@@ -17,7 +17,9 @@
     "Visualization"
   ],
   "keywords": [
-    "markdown", "debugging", "literate programming"
+    "markdown",
+    "debugging",
+    "literate programming"
   ],
   "activationEvents": [
     "onLanguage:markdonw"
