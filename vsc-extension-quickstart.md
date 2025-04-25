@@ -55,3 +55,7 @@ Guide: <https://code.visualstudio.com/api/working-with-extensions/publishing-ext
   ```sh
   npm run package
   ```
+- Tag a version
+  ```sh
+  npm version x.y.z
+  ```
