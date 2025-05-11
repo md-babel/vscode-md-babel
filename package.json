@@ -58,7 +58,9 @@
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "vscode-test",
-    "package": "vsce package"
+    "package": "vsce package",
+    "prettier:format": "npx prettier . --write",
+    "prettier:check": "npx prettier . --check"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
