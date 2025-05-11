@@ -60,7 +60,8 @@
     "test": "vscode-test",
     "package": "vsce package",
     "prettier:format": "npx prettier . --write",
-    "prettier:check": "npx prettier . --check"
+    "prettier:check": "npx prettier . --check",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -70,6 +71,11 @@
     "@typescript-eslint/parser": "^8.28.0",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
     "prettier": "3.5.3"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   }
 }
