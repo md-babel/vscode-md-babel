@@ -1,6 +1,6 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
-import { execFileSync } from 'child_process';
+import * as vscode from "vscode";
+import * as path from "path";
+import { execFileSync } from "child_process";
 
 /** 1-based line and column indices (conforming to cmark). */
 interface SourceLocation {
@@ -20,56 +20,63 @@ interface MdBabelResponse {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  let disposable = vscode.commands.registerCommand('vscode-md-babel.executeBlockAtPoint', async () => {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      vscode.window.showErrorMessage('No active editor!');
-      return;
-    }
-
-    if (editor.document.languageId !== 'markdown') {
-      vscode.window.showErrorMessage('Not a Markdown file!');
-      return;
-    }
-
-    const config = vscode.workspace.getConfiguration('mdBabel');
-    const mdBabelPath = config.get<string>('executablePath');
-
-    if (!mdBabelPath) {
-      vscode.window.showErrorMessage('md-babel executable path not set. Please configure mdBabel.executablePath');
-      return;
-    }
-
-    try {
-      const position = editor.selection.active;
-      const location = getSourceLocation(position);
-
-      let workingDir: string;
-      let filename: string | undefined;
-      if (editor.document.uri.scheme === 'file') {
-        const fsPath = editor.document.uri.fsPath;
-        const fileDir = path.dirname(fsPath);
-        const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
-        workingDir = workspaceFolder ? workspaceFolder.uri.fsPath : fileDir;
-        filename = path.basename(fsPath, path.extname(fsPath));
-      } else {
-        workingDir = process.cwd();
-        filename = undefined;
+  let disposable = vscode.commands.registerCommand(
+    "vscode-md-babel.executeBlockAtPoint",
+    async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showErrorMessage("No active editor!");
+        return;
       }
 
-      const response = await executeCodeBlock(
-        mdBabelPath,
-        workingDir,
-        filename,
-        location,
-        editor.document.getText()
-      );
+      if (editor.document.languageId !== "markdown") {
+        vscode.window.showErrorMessage("Not a Markdown file!");
+        return;
+      }
 
-      await applyResponse(editor, response);
-    } catch (error) {
-      vscode.window.showErrorMessage(`Error executing md-babel: ${error}`);
-    }
-  });
+      const config = vscode.workspace.getConfiguration("mdBabel");
+      const mdBabelPath = config.get<string>("executablePath");
+
+      if (!mdBabelPath) {
+        vscode.window.showErrorMessage(
+          "md-babel executable path not set. Please configure mdBabel.executablePath",
+        );
+        return;
+      }
+
+      try {
+        const position = editor.selection.active;
+        const location = getSourceLocation(position);
+
+        let workingDir: string;
+        let filename: string | undefined;
+        if (editor.document.uri.scheme === "file") {
+          const fsPath = editor.document.uri.fsPath;
+          const fileDir = path.dirname(fsPath);
+          const workspaceFolder = vscode.workspace.getWorkspaceFolder(
+            editor.document.uri,
+          );
+          workingDir = workspaceFolder ? workspaceFolder.uri.fsPath : fileDir;
+          filename = path.basename(fsPath, path.extname(fsPath));
+        } else {
+          workingDir = process.cwd();
+          filename = undefined;
+        }
+
+        const response = await executeCodeBlock(
+          mdBabelPath,
+          workingDir,
+          filename,
+          location,
+          editor.document.getText(),
+        );
+
+        await applyResponse(editor, response);
+      } catch (error) {
+        vscode.window.showErrorMessage(`Error executing md-babel: ${error}`);
+      }
+    },
+  );
 
   context.subscriptions.push(disposable);
 }
@@ -78,7 +85,7 @@ export function activate(context: vscode.ExtensionContext) {
 export function getSourceLocation(position: vscode.Position): SourceLocation {
   return {
     line: position.line + 1,
-    column: position.character + 1
+    column: position.character + 1,
   };
 }
 
@@ -86,7 +93,7 @@ export function getSourceLocation(position: vscode.Position): SourceLocation {
 export function getPosition(sourceLocation: SourceLocation): vscode.Position {
   return new vscode.Position(
     sourceLocation.line - 1,
-    sourceLocation.column - 1
+    sourceLocation.column - 1,
   );
 }
 
@@ -105,26 +112,28 @@ function executeCodeBlock(
   workingDir: string,
   filename: string | undefined,
   location: SourceLocation,
-  documentText: string
+  documentText: string,
 ): Promise<MdBabelResponse> {
   return new Promise((resolve, reject) => {
     try {
       let args = [
-        'exec',
-        '--dir', workingDir,
-        '--line', `${location.line}`,
-        '--column', `${location.column}`,
+        "exec",
+        "--dir",
+        workingDir,
+        "--line",
+        `${location.line}`,
+        "--column",
+        `${location.column}`,
       ];
 
       if (filename !== undefined) {
-        args.push('--filename', filename);
+        args.push("--filename", filename);
       }
 
-      const output = execFileSync(mdBabelPath, args,
-      {
+      const output = execFileSync(mdBabelPath, args, {
         input: documentText,
-        encoding: 'utf-8',
-        cwd: workingDir
+        encoding: "utf-8",
+        cwd: workingDir,
       });
       const response = JSON.parse(output) as MdBabelResponse;
       resolve(response);
@@ -136,11 +145,11 @@ function executeCodeBlock(
 
 async function applyResponse(
   editor: vscode.TextEditor,
-  response: MdBabelResponse
+  response: MdBabelResponse,
 ): Promise<void> {
   // 1) Apply replacementString at replacementRange in the editor.
   const replacementRange = getRange(response.replacementRange);
-  await editor.edit(editBuilder => {
+  await editor.edit((editBuilder) => {
     editBuilder.replace(replacementRange, response.replacementString);
   });
 
