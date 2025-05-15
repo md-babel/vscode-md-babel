@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { execFileSync } from "child_process";
+import { isInCodeBlock } from "./isInCodeBlock.js";
 
 /** 1-based line and column indices (conforming to cmark). */
 interface SourceLocation {
@@ -61,6 +62,10 @@ export function activate(context: vscode.ExtensionContext) {
         } else {
           workingDir = process.cwd();
           filename = undefined;
+        }
+
+        if (!isInCodeBlock(editor.document.getText(), location.line)) {
+          return;
         }
 
         const response = await executeCodeBlock(
