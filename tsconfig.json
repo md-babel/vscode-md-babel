@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "module": "Preserve",
-    "noEmit": true,
     "target": "ES2022",
     "outDir": "out",
     "lib": ["ES2022"],
