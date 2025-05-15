@@ -1,7 +1,6 @@
 import * as assert from "assert";
 import { isInCodeBlock } from "../isInCodeBlock.js";
 
-// TODO: test with gfm
 const document = `First line
 Line above block
 \`\`\`js
