@@ -77,5 +77,9 @@
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
+  },
+  "dependencies": {
+    "mdast-util-from-markdown": "^2.0.2",
+    "unist-util-find": "^3.0.0"
   }
 }
