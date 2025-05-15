@@ -2,40 +2,50 @@ import * as assert from "assert";
 import { isInCodeBlock } from "../isInCodeBlock.js";
 
 // TODO: test with gfm
-const commonMarkDocument = `First line
-Line before block
+const document = `First line
+Line above block
+\`\`\`js
+console.log("Hello, world!");
+\`\`\`
+Line below block
 
-    const t = 1;
-    console.log("Hello, world!");
-    return;
+~~~sh
+date
+echo ""
+~~~
 
-Line after block
 Last line
 `;
 
-suite("It is in the code block if", () => {
-  test("it is at the top of it", () => {
-    assert.strictEqual(isInCodeBlock(commonMarkDocument, 4), true);
+suite("It is in the code block", () => {
+  suite("created by backticks if", () => {
+    test("it is at the top of it", () => {
+      assert.strictEqual(isInCodeBlock(document, 3), true);
+    });
+    test("it is at the bottom of it", () => {
+      assert.strictEqual(isInCodeBlock(document, 5), true);
+    });
+    test("it is in the middle of it", () => {
+      assert.strictEqual(isInCodeBlock(document, 4), true);
+    });
   });
-  test("it is at the bottom of it", () => {
-    assert.strictEqual(isInCodeBlock(commonMarkDocument, 6), true);
-  });
-  test("it is in the middle of it", () => {
-    assert.strictEqual(isInCodeBlock(commonMarkDocument, 5), true);
+
+  test("created by tildes", () => {
+    assert.strictEqual(isInCodeBlock(document, 9), true);
   });
 });
 
 suite("It is not in the code block if", () => {
   test("it is above it", () => {
-    assert.strictEqual(isInCodeBlock(commonMarkDocument, 1), false);
+    assert.strictEqual(isInCodeBlock(document, 1), false);
   });
   test("it is a line above it", () => {
-    assert.strictEqual(isInCodeBlock(commonMarkDocument, 3), false);
+    assert.strictEqual(isInCodeBlock(document, 2), false);
   });
   test("it is below it", () => {
-    assert.strictEqual(isInCodeBlock(commonMarkDocument, 9), false);
+    assert.strictEqual(isInCodeBlock(document, 13), false);
   });
   test("it is a line below it", () => {
-    assert.strictEqual(isInCodeBlock(commonMarkDocument, 7), false);
+    assert.strictEqual(isInCodeBlock(document, 6), false);
   });
 });
