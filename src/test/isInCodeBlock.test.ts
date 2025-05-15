@@ -23,7 +23,6 @@ suite("It is in the code block if", () => {
   test("it is in the middle of it", () => {
     assert.strictEqual(isInCodeBlock(commonMarkDocument, 5), true);
   });
-  suite("the document consists of a code block", () => {});
 });
 
 suite("It is not in the code block if", () => {
@@ -39,5 +38,4 @@ suite("It is not in the code block if", () => {
   test("it is a line below it", () => {
     assert.strictEqual(isInCodeBlock(commonMarkDocument, 7), false);
   });
-  suite("the document does not contain a code block", () => {});
 });
