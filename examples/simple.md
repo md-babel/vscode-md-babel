@@ -11,3 +11,5 @@ echo "Hello, world!"
 ```
 Hello, world!
 ```
+
+`echo "Inline Code"`

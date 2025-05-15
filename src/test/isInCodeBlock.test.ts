@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import { isInCodeBlock } from "../isInCodeBlock.js";
 
-// TODO: test with gfm and inline code block
+// TODO: test with gfm
 const commonMarkDocument = `First line
 Line before block
 
