@@ -18,7 +18,7 @@ Last line
 `;
 
 suite("It is in the code block", () => {
-  suite("created by backticks if", () => {
+  suite("created with backticks if", () => {
     test("it is at the top of it", () => {
       assert.strictEqual(isInCodeBlock(document, 3), true);
     });
@@ -30,7 +30,7 @@ suite("It is in the code block", () => {
     });
   });
 
-  test("created by tildes", () => {
+  test("created with tildes", () => {
     assert.strictEqual(isInCodeBlock(document, 9), true);
   });
 });
