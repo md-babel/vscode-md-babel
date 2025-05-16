@@ -64,7 +64,9 @@ export function activate(context: vscode.ExtensionContext) {
           filename = undefined;
         }
 
-        if (!isInCodeBlock(editor.document.getText(), location.line)) {
+        const document = editor.document.getText();
+
+        if (!isInCodeBlock(document, location.line)) {
           return;
         }
 
@@ -73,7 +75,7 @@ export function activate(context: vscode.ExtensionContext) {
           workingDir,
           filename,
           location,
-          editor.document.getText(),
+          document,
         );
 
         await applyResponse(editor, response);

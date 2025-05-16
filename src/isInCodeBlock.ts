@@ -7,6 +7,9 @@ import { find } from "unist-util-find";
  * @returns whether `line` is a code block in `document`.
  */
 export function isInCodeBlock(document: string, line: number): boolean {
+  // Transforming the document every time to an AST could become expensive.
+  // We should refactor this if `isInCodeBlock` is used often.
+  // See https://github.com/md-babel/vscode-md-babel/issues/22.
   const tree = fromMarkdown(document);
 
   const node = find(tree, (node) => {

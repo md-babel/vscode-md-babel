@@ -12,4 +12,4 @@ echo "Hello, world!"
 Hello, world!
 ```
 
-`echo "Inline Code"`
+`echo "Inline Code"` should not work :)
