@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import * as mdBabel from "../extension";
+import * as mdBabel from "../extension.js";
 
 suite("Position Conversion Functions", () => {
   test("getSourceLocation should convert VSCode position to 1-based locations", () => {

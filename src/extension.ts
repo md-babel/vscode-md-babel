@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { execFileSync } from "child_process";
+import { isInCodeBlock } from "./isInCodeBlock.js";
 
 /** 1-based line and column indices (conforming to cmark). */
 interface SourceLocation {
@@ -63,12 +64,18 @@ export function activate(context: vscode.ExtensionContext) {
           filename = undefined;
         }
 
+        const document = editor.document.getText();
+
+        if (!isInCodeBlock(document, location.line)) {
+          return;
+        }
+
         const response = await executeCodeBlock(
           mdBabelPath,
           workingDir,
           filename,
           location,
-          editor.document.getText(),
+          document,
         );
 
         await applyResponse(editor, response);

@@ -1,5 +1,6 @@
 {
   "name": "vscode-md-babel",
+  "type": "module",
   "publisher": "md-babel",
   "displayName": "Markdown Babel",
   "description": "Execute code blocks in Markdown files using md-babel",
@@ -77,5 +78,9 @@
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
+  },
+  "dependencies": {
+    "mdast-util-from-markdown": "^2.0.2",
+    "unist-util-find": "^3.0.0"
   }
 }
