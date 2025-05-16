@@ -59,7 +59,7 @@ suite("It is not in the code block if", () => {
     });
 
     test("-1", () => {
-      assert.strictEqual(isInCodeBlock(document, 0), false);
+      assert.strictEqual(isInCodeBlock(document, -1), false);
     });
 
     test("too large", () => {
