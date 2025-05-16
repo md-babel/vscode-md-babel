@@ -1,7 +1,12 @@
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { find } from "unist-util-find";
 
-export function isInCodeBlock(document: string, position: number): boolean {
+/**
+ * @param document a Markdown document
+ * @param line a line number in the Markdown document
+ * @returns whether `line` is a code block in `document`.
+ */
+export function isInCodeBlock(document: string, line: number): boolean {
   const tree = fromMarkdown(document);
 
   const node = find(tree, (node) => {
@@ -11,8 +16,8 @@ export function isInCodeBlock(document: string, position: number): boolean {
 
     return (
       node.type === "code" &&
-      node.position.start.line <= position &&
-      node.position.end.line >= position
+      node.position.start.line <= line &&
+      node.position.end.line >= line
     );
   });
 
