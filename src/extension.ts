@@ -45,7 +45,8 @@ export function activate(context: vscode.ExtensionContext) {
 
       if (mdBabelPath == null) {
         vscode.window.showErrorMessage(
-          "md-babel was not found. Please add md-babel to $PATH or configure mdBabel.executablePath.",
+          `md-babel was not found. Please add md-babel to the path environment
+          variable ($PATH) or configure mdBabel.executablePath.`,
         );
         return;
       }
