@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { execFileSync } from "child_process";
 import { isInCodeBlock } from "./isInCodeBlock.js";
+import which from "which";
 
 /** 1-based line and column indices (conforming to cmark). */
 interface SourceLocation {
@@ -36,11 +37,15 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       const config = vscode.workspace.getConfiguration("mdBabel");
-      const mdBabelPath = config.get<string>("executablePath");
+      // The default value of mdBabel.executablePath is "".
+      // This is configured in package.json under contributes.configuration.
+      const mdBabelPath =
+        config.get<string>("executablePath", "") ||
+        which.sync("md-babel", { nothrow: true });
 
-      if (!mdBabelPath) {
+      if (mdBabelPath == null) {
         vscode.window.showErrorMessage(
-          "md-babel executable path not set. Please configure mdBabel.executablePath",
+          "md-babel was not found. Please add md-babel to $PATH or configure mdBabel.executablePath.",
         );
         return;
       }
