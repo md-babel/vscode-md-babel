@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { execFileSync } from "child_process";
 import { isInCodeBlock } from "./isInCodeBlock.js";
+import { handleNotSupportedOs, isOsSupported } from "./os.js";
 
 /** 1-based line and column indices (conforming to cmark). */
 interface SourceLocation {
@@ -24,6 +25,11 @@ export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
     "vscode-md-babel.executeBlockAtPoint",
     async () => {
+      if (!isOsSupported()) {
+        await handleNotSupportedOs(context);
+        return;
+      }
+
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
         vscode.window.showErrorMessage("No active editor!");
