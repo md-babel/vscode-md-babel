@@ -91,3 +91,25 @@ const hurl = {
     },
   },
 };
+
+const codeBlockWithImages: Configuration = {
+  evaluators: {
+    codeBlock: {
+      lang: {
+        path: "",
+        defaultArguments: [],
+        result: "codeBlock",
+      },
+      image: {
+        path: "",
+        defaultArguments: [],
+        result: {
+          type: "image",
+          extension: "",
+          directory: "",
+          filename: "",
+        },
+      },
+    },
+  },
+};
