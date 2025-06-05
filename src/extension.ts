@@ -21,8 +21,9 @@ interface MdBabelResponse {
   range: SourceRange;
 }
 
-// The default value of mdBabel.executablePath is "".
-// This is configured in package.json under contributes.configuration.
+// The default value of mdBabel.executablePath is "". This
+// is configured in package.json under
+// contributes.configuration.
 const defaultExecutablePath = "";
 
 export function activate(context: vscode.ExtensionContext) {
