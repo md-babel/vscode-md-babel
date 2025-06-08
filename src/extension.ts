@@ -3,6 +3,7 @@ import * as path from "path";
 import { execFileSync } from "child_process";
 import { isInCodeBlock } from "./isInCodeBlock.js";
 import { handleNotSupportedOs, isOsSupported } from "./os.js";
+import which from "which";
 
 /** 1-based line and column indices (conforming to cmark). */
 interface SourceLocation {
@@ -20,6 +21,11 @@ interface MdBabelResponse {
   replacementString: string;
   range: SourceRange;
 }
+
+// The default value of mdBabel.executablePath is "". This
+// is configured in package.json under
+// contributes.configuration.
+const defaultExecutablePath = "";
 
 export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
@@ -42,11 +48,17 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       const config = vscode.workspace.getConfiguration("mdBabel");
-      const mdBabelPath = config.get<string>("executablePath");
+      // We read the executablePath from the config, if it
+      // is set to a non-default value (empty string), and
+      // use which otherwise.
+      const mdBabelPath =
+        config.get<string>("executablePath", defaultExecutablePath) ||
+        which.sync("md-babel", { nothrow: true });
 
-      if (!mdBabelPath) {
+      if (mdBabelPath === null) {
         vscode.window.showErrorMessage(
-          "md-babel executable path not set. Please configure mdBabel.executablePath",
+          `md-babel was not found. Please add md-babel to the path environment
+          variable ($PATH) or configure mdBabel.executablePath.`,
         );
         return;
       }
