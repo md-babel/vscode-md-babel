@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { type } from "node:os";
 
 /**
- * md-babel runs currently only on macOS and Linux.
+ * md-babel currently runs only on macOS and Linux.
  * @returns whether md-babel runs on the current operating
  * system
  */
