@@ -6,7 +6,7 @@ import { type } from "node:os";
  * @returns whether md-babel runs on the current operating
  * system
  */
-export function isOsSupported(): boolean {
+export function isOSSupported(): boolean {
   return ["Linux", "Darwin"].includes(type());
 }
 
@@ -21,7 +21,7 @@ export function isOsSupported(): boolean {
  *
  * @param context the context of the extension
  */
-export async function handleNotSupportedOs(
+export async function handleNotSupportedOS(
   context: vscode.ExtensionContext,
 ): Promise<void> {
   const alreadyActivated = "alreadyActivated";
