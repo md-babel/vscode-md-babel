@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { type } from "node:os";
+import { platform } from "node:os";
 
 /**
  * md-babel currently runs only on macOS and Linux.
@@ -7,7 +7,7 @@ import { type } from "node:os";
  * system
  */
 export function isOSSupported(): boolean {
-  return ["Linux", "Darwin"].includes(type());
+  return ["linux", "darwin"].includes(platform());
 }
 
 /**
