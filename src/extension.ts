@@ -4,6 +4,7 @@ import { execFileSync } from "child_process";
 import { isInCodeBlock } from "./isInCodeBlock.js";
 import { handleNotSupportedOS, isOSSupported } from "./os.js";
 import which from "which";
+import { isMdBabelInPath } from "./isMdBabelInPath.js";
 
 /** 1-based line and column indices (conforming to cmark). */
 interface SourceLocation {
@@ -55,24 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
         config.get<string>("executablePath", defaultExecutablePath) ||
         which.sync("md-babel", { nothrow: true });
 
-      const releasePage = "Release Page";
-      if (mdBabelPath === null) {
-        vscode.window
-          .showErrorMessage(
-            `md-babel was not found. Please add md-babel to the path environment
-             variable ($PATH) or configure mdBabel.executablePath.
-             You can download md-babel from the release page.`,
-            releasePage,
-          )
-          .then((selection) => {
-            if (selection === releasePage) {
-              vscode.env.openExternal(
-                vscode.Uri.parse(
-                  "https://github.com/md-babel/swift-markdown-babel/releases/latest",
-                ),
-              );
-            }
-          });
+      if (!isMdBabelInPath(mdBabelPath)) {
         return;
       }
 
